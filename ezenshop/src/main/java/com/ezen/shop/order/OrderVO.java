@@ -21,5 +21,7 @@ public class OrderVO {
 	private String ord_tel;
 	private String ord_mail;
 	private int ord_price;
+	private String ord_status;
 	private Date ord_regdate;
+	private String ord_message;  // 관리자 메모용도
 }

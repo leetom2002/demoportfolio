@@ -18,6 +18,8 @@ import com.ezen.shop.common.utils.Criteria;
 import com.ezen.shop.common.utils.FileUtils;
 import com.ezen.shop.common.utils.PageMaker;
 import com.ezen.shop.common.utils.SearchCriteria;
+import com.ezen.shop.mail.EmailDTO;
+import com.ezen.shop.mail.EmailService;
 import com.ezen.shop.member.MemberService;
 import com.ezen.shop.member.MemberVO;
 
@@ -34,6 +36,7 @@ public class OrderController {
 	private final OrderService orderService;
 	private final CartService cartService;
 	private final MemberService memberService;
+	private final EmailService emailService;
 	
 	// 상품이미지 관련작업기능
 	private final FileUtils fileUtils;
@@ -101,7 +104,7 @@ public class OrderController {
 		// 총주문금액
 		model.addAttribute("order_total_price", cartService.getCartTotalPriceByUserId(mbsp_id));
 		
-		
+				
 		// 로그인한 사용자정보
 		MemberVO memberVO =  memberService.modify(mbsp_id);
 		model.addAttribute("memberVO", memberVO);
@@ -122,6 +125,7 @@ public class OrderController {
 		orderService.order_process(vo, mbsp_id, p_method_info);
 		
 		rttr.addAttribute("ord_code", vo.getOrd_code());
+		rttr.addAttribute("ord_mail", vo.getOrd_mail());
 		
 		// /order/order_result?ord_code=주문번호
 		
@@ -132,7 +136,7 @@ public class OrderController {
 	
 	// 주문결과내역
 	@GetMapping("/order_result")
-	public void order_result(Integer ord_code, Model model) throws Exception {
+	public void order_result(Integer ord_code, String ord_mail, Model model) throws Exception {
 		
 		// 반드시 0으로 초기화해야한다. 그렇지 않으면, 세션이 유지된 상태에서 새로운 구매를 진행하면 총금액이 누적됨.
 		order_total_price = 0;
@@ -146,6 +150,10 @@ public class OrderController {
 			order_total_price += ((int) o_Info.get("dt_amount") * (int) o_Info.get("dt_price"));
 		});
 		
+		EmailDTO dto = new EmailDTO("EZenShop", "EZenShop", "newcomsa@nate.com", "주문내역", "주문내역");
+		
+		emailService.sendMail("mail/orderConfirmation", dto, order_info, order_total_price);
+		
 		
 		log.info("총주문금액:" + order_total_price);
 		
@@ -153,8 +161,8 @@ public class OrderController {
 		model.addAttribute("order_total_price", order_total_price);
 	}
 	
-	
-	@GetMapping("/order_list")
+	// order_list : 주문목록  review_manage: 주문목록중 배송완료 대상
+	@GetMapping(value =  {"/order_list"})
 	public void order_list(SearchCriteria cri, HttpSession session, Model model) throws Exception {
 		
 		String mbsp_id = ((MemberVO) session.getAttribute("login_auth")).getMbsp_id();
@@ -181,6 +189,34 @@ public class OrderController {
 		
 	}
 	
+	@GetMapping(value =  {"/review_manage" })
+	public void review_manage (SearchCriteria cri, HttpSession session, Model model) throws Exception {
+		
+		// 상품테이블, 주문, 주문상세테이블, 배송테이블
+		// 상품코드, 상품이미지, 상품명, 배송일, 리뷰작성하기 버튼
+		String mbsp_id = ((MemberVO) session.getAttribute("login_auth")).getMbsp_id();
+		
+		cri.setPerPageNum(2);
+		
+		List<Map<String, Object>> review_list = orderService.review_manage(mbsp_id, cri);
+		
+		// 날짜폴더의 역슬래쉬 \ 를 / 로 변환작업
+		review_list.forEach(r_Info -> {
+			r_Info.put("pro_up_folder", r_Info.get("pro_up_folder").toString().replace("\\", "/"));			
+		});
+		
+		model.addAttribute("review_list", review_list);
+		
+		
+		
+		PageMaker pageMaker = new PageMaker();
+		pageMaker.setCri(cri);
+		pageMaker.setTotalCount(orderService.getReviewCountByUser_id(mbsp_id));
+		
+		model.addAttribute("pageMaker", pageMaker);
+	
+	}
+		
 	// 상품목록 이미지출력하기.. 클라이언트에서 보낸 파라미터명 스프링의 컨트롤러에서 받는 파라미터명이 일치해야 한다.
 	@GetMapping("/image_display")
 	public ResponseEntity<byte[]> image_display(String dateFolderName, String fileName) throws Exception {

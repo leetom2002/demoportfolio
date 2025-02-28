@@ -37,5 +37,45 @@
 	
 	
 	</insert>
+	
+	<select id="review_info" resultType="com.ezen.shop.review.ReviewVO" parameterType="Long">
+	
+		select
+			rev_code, mbsp_id,pro_num,rev_content,rev_rate, rev_date
+		from 
+			review_tbl
+		where
+			rev_code = #{rev_code}
+	
+	</select>
+	
+	<update id="review_modify" parameterType="com.ezen.shop.review.ReviewVO">
+	
+		update
+			review_tbl
+		set
+			rev_rate = #{rev_rate}, rev_content = #{rev_content}, rev_date = now()
+		where
+			rev_code = #{rev_code}	
+	
+	</update>
+	
+	
+	<delete id="review_delete" parameterType="Long">
+	
+		delete from
+			review_tbl
+		where
+			rev_code = #{rev_code}
+			
+	</delete>
+	
+	
+	
+	
+	
+	
+	
+	
 
 </mapper>

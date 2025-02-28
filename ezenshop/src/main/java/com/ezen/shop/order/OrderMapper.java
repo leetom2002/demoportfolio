@@ -23,4 +23,8 @@ public interface OrderMapper {
 	int getOrderCountByUser_id(String mbsp_id);
 	
 	String getCategoryNameByPro_num(Integer pro_num);
+	
+	List<Map<String, Object>> review_manage(@Param("mbsp_id") String mbsp_id, @Param("cri") SearchCriteria cri);
+	
+	int getReviewCountByUser_id(String mbsp_id);
 }

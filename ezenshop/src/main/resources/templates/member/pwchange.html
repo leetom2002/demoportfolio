@@ -5,9 +5,9 @@
 <th:block layout:fragment="content">
 	<div class="row mt-5">
 		<div class="col-3">
-			<h3>Mypage</h3>
-			<a href="/member/pwchange">비밀번호 변경</a>
-			<a href="#" id="pwchange2">비밀번호 변경2</a>
+			
+			<th:block th:replace="~{member/mypage_menu::menu}"></th:block>
+			
 		</div>
 		<div class="col-9">
 			<form method="post" action="/member/pwchange">

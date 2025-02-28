@@ -26,4 +26,8 @@ public class ProductService {
 	public ProductVO pro_info(Integer pro_num) {
 		return productMapper.pro_info(pro_num);
 	}
+	
+	public int review_count_pro_info(Integer pro_num) {
+		return productMapper.review_count_pro_info(pro_num);
+	}
 }

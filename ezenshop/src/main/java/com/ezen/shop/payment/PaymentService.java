@@ -9,4 +9,8 @@ import lombok.RequiredArgsConstructor;
 public class PaymentService {
 
 	private final PaymentMapper paymentMapper;
+	
+	public void payment_status(Integer payment_id, String payment_status) {
+		paymentMapper.payment_status(payment_id, payment_status);
+	}
 }

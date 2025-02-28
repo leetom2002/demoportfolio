@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ezen.shop.cart.CartMapper;
 import com.ezen.shop.common.utils.Criteria;
 import com.ezen.shop.common.utils.SearchCriteria;
+import com.ezen.shop.delivery.DeliveryMapper;
+import com.ezen.shop.delivery.DeliveryVO;
 import com.ezen.shop.payment.PaymentMapper;
 import com.ezen.shop.payment.PaymentVO;
 
@@ -23,6 +25,7 @@ public class OrderService {
 	private final OrderMapper orderMapper;
 	private final PaymentMapper paymentMapper;
 	private final CartMapper cartMapper;
+	private final DeliveryMapper deliveryMapper;
 	
 	// 주문하기.(주문테이블, 주문상세테이블, 결제테이블, 장바구니테이블)
 	@Transactional
@@ -57,6 +60,16 @@ public class OrderService {
 		
 		// 4)장바구니테이블
 		cartMapper.cart_empty(mbsp_id);
+		
+		// 5)배송테이블
+		DeliveryVO deliveryVO = new DeliveryVO();
+		deliveryVO.setOrd_code(vo.getOrd_code());
+		deliveryVO.setShipping_addr(vo.getOrd_addr_basic());
+		deliveryVO.setShipping_deaddr(vo.getOrd_addr_detail());
+		deliveryVO.setShipping_zipcode(vo.getOrd_addr_zipcode());
+		
+		deliveryMapper.delivery_insert(deliveryVO);
+		
 	}
 	
 	// 실시간 결제에 따른 주문내역
@@ -74,6 +87,14 @@ public class OrderService {
 	
 	public String getCategoryNameByPro_num(Integer pro_num) {
 		return orderMapper.getCategoryNameByPro_num(pro_num);
+	}
+	
+	public List<Map<String, Object>> review_manage(String mbsp_id, SearchCriteria cri) {
+		return orderMapper.review_manage(mbsp_id, cri);
+	}
+	
+	public int getReviewCountByUser_id(String mbsp_id) {
+		return orderMapper.getReviewCountByUser_id(mbsp_id);
 	}
 	
 }

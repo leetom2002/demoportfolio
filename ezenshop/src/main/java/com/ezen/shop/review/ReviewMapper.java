@@ -14,4 +14,10 @@ public interface ReviewMapper {
 	int getCountReviewByPro_num(Integer pro_num);
 	
 	void review_save(ReviewVO vo);
+	
+	ReviewVO review_info(Long rev_code);
+	
+	void review_modify(ReviewVO vo);
+	
+	void review_delete(Long rev_code);
 }

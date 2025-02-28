@@ -99,7 +99,19 @@ public class MemberController {
 				memberVO.setMbsp_password("");
 				session.setAttribute("login_auth", memberVO);
 				
-				url = "/";
+				if(session.getAttribute("targetUrl") != null) {
+					url = (String) session.getAttribute("targetUrl");
+					
+					if(session.getAttribute("postData") != null) {
+						log.info("데이타: " + session.getAttribute("postData"));
+						
+						url = url + "?" +  (String) session.getAttribute("postData");
+					}
+					
+				}else {
+					url = "/";
+					
+				}
 			}else { // 비번이 틀린의미.
 				status = "pwFail";
 				url = "/member/login";
@@ -109,9 +121,9 @@ public class MemberController {
 			url = "/member/login";
 		}
 		
-		if(session.getAttribute("targetUrl") != null) { // 이전주소가 존재하면
-			url = (String) session.getAttribute("targetUrl");
-		}
+
+		
+		
 		
 		// 이동되는 주소의 타임리프페이지에서 status 이름으로 사용할수가 있다. 페이지에서 자바스크립트 문법으로 사용
 		rttr.addFlashAttribute("status", status);

@@ -42,7 +42,6 @@
         <td>{{rev_code}}</td>
         <td>{{mbsp_id}}</td>
         <td>{{rev_content}}</td>
-        <td>{{rev_content}}</td>
         <td>{{displayStar rev_rate}}</td>
         <td>{{convertDate rev_date}}</td>
         <td>
@@ -94,9 +93,9 @@
 
       // 사용자가 로그인상태이고, 로그인아이디와 후기작성자아이디가 일치한다면
       if(memberVo !== null && loginId == msbp_id) {
-        str += `<button type="button" name="delete" class="btn btn-outline-danger btn-sm" data-rno="${rev_code}">delete</button>`;
-        str += `<button type="button" name="edit" class="btn btn-outline-info btn-sm" data-rno="${rev_code}">edit</button>`;
-        str += `<button type="button" name="update" class="btn btn-outline-info btn-sm" data-rno="${rev_code}">update</button>`;
+        str += `<button type="button" name="delete" class="btn btn-outline-danger btn-sm" data-rev_code="${rev_code}">delete</button>`;
+        str += `<button type="button" name="edit" class="btn btn-outline-info btn-sm" data-rev_code="${rev_code}">edit</button>`;
+        // str += `<button type="button" name="update" class="btn btn-outline-info btn-sm" data-rev_code="${rev_code}">update</button>`;
 
         return new Handlebars.SafeString(str);
       }else {
@@ -150,7 +149,7 @@
           <button type="button" class="btn btn-outline-primary" id="btn_cart_add">Cart</button> 
           <button type="button" class="btn btn-outline-primary" id="btn_buy_add">Buy</button>
         </div>
-        <small class="text-body-secondary">상품후기 : [[${productVo.pro_review}]]</small>
+        <small class="text-body-secondary">상품후기 :   <span id="review_count" th:text="${productVo.pro_review}"></span></small>
       </div>
     </div>
   </div>
@@ -216,6 +215,14 @@
                 location.href = "/cart/cart_list";
               }
             }
+          },
+          beforeSend : function(xhr) {
+            xhr.setRequestHeader("AJAX", "true");
+          },
+          error: function(xhr, status, error) {  // 스프링에서 응답된 정보중에 에러코드가 존재하면
+            console.log(xhr);
+            alert("인증되지 않은 상태입니다. 로그인 페이지로 이동됩니다.");
+            location.href = "/member/login";
           }
         });
       });
@@ -343,6 +350,7 @@
 
     // 별평점 클릭 이벤트일때 스타일 효과
     $("p#star_rev_rate a.rev_rate").on("click", function(e) {
+     
       e.preventDefault();
       // 기존에 적용했던 a태그(별)들의 on 클래스선택자 제거
       $(this).parent().children().removeClass("on");
@@ -352,9 +360,9 @@
 
     // 상품후기저장 클릭이벤트.  id="btn_rev_save"
     $("button#btn_rev_save").on("click", function() {
-      let pro_num = $(this).data("pro_num");
-      let rev_content = $("#rev_content").val();
-      let rev_rate = 0;
+      let pro_num = $(this).data("pro_num"); // 상품코드
+      let rev_content = $("#rev_content").val(); // 상품평
+      let rev_rate = 0; // 별평점
 
       // <a class="rev_rate on">★</a> 태그에 class="rev_rate on" 이 개수가 몇개인지 체크
       $("p#star_rev_rate a.rev_rate").each(function() {
@@ -384,9 +392,13 @@
         },
         data : JSON.stringify(review_data), // object문법을 json문자열로 변환
         dataType: 'text',
-        success: function(result) {
-          if(result == "success") {
+        success: function(review_count) {
+          if(review_count > 0) {
             alert("상품후기 등록됨");
+
+            // 리뷰카운트 보여주기.  id="review_count"
+            $("span#review_count").html(review_count);
+
             reviewPage = 1;
             getPage(url);
           }
@@ -394,7 +406,167 @@
       });
     });
 
-    }); // ready event end
+    // 수정버튼 이벤트.   name="edit"   reviewList
+    $("div#reviewList").on("click", "button[name='edit']", function() {
+      let rev_code = $(this).data("rev_code"); // 상품후기코드
+
+      console.log("상품후기코드", rev_code);
+      // 현재 선택한 수정버튼 tr안의 td태그를 제거
+      let cur_tr = $(this).parent().parent();
+      cur_tr.find("td").remove();
+
+      // 수정내용을 화면에 출력.
+      $.ajax({
+        url : '/review/review_info/' + rev_code,
+        type: 'get',
+        dataType: 'json',
+        success : function(result) {
+          
+          console.log(result);
+          // db에서 가져온 내용을 태그와 결합한 문자열
+          let str_rev_code = $(`<td>${result.rev_code}</td>`);
+          let str_mbsp_id = $(`<td>${result.mbsp_id}</td>`);
+          let str_rev_content = $(`<td><input type="text" name="rev_content" value="${result.rev_content}"></td>`);
+          let star_rate = result.rev_rate;
+          
+          /*
+          <p id="star_rev_rate">
+              <a class="rev_rate" href="#">☆</a>
+              <a class="rev_rate" href="#">☆</a>
+              <a class="rev_rate" href="#">☆</a>
+              <a class="rev_rate" href="#">☆</a>
+              <a class="rev_rate" href="#">☆</a>
+              (별평점)
+            </p>
+          */
+         
+          let tempStr = '<p id="star_rev_rate">';
+          for(let i=1; i<=5; i++) {
+            if(i <= star_rate) {
+              tempStr += '<a class="rev_rate on" href="#">☆</a>';
+            }else {
+              tempStr += '<a class="rev_rate" href="#">☆</a>';
+            }
+          }
+
+          tempStr += '</p>';
+
+          let str_star_rate = $(`<td>${tempStr}</td>`);
+          let str_rev_date = $(`<td>${result.rev_date}</td>`);
+          let str_update_button = $(`<button type="button" name="update" class="btn btn-outline-info btn-sm" data-rev_code="${result.rev_code}">update</button>`);
+          let str_cancel_button = $(`<button type="button" name="cancel" class="btn btn-outline-info btn-sm" data-rev_code="${result.rev_code}">cancel</button>`);
+
+          cur_tr.append(str_rev_code);
+          cur_tr.append(str_mbsp_id);
+          cur_tr.append(str_rev_content);
+          cur_tr.append(str_star_rate);
+          cur_tr.append(str_rev_date);
+          cur_tr.append(str_update_button);
+          cur_tr.append(str_cancel_button);
+        }
+      });
+
+      // 수정상태에서의 별 클릭이벤트
+      $("div#reviewList").on("click", "p#star_rev_rate a.rev_rate", function(e) {
+        e.preventDefault();
+        // 기존에 적용했던 a태그(별)들의 on 클래스선택자 제거
+        $(this).parent().children().removeClass("on");
+        // 선택한 a태그 자신에 on 클래스선택자 적용하고, 이전 a태그(이전 별들)에게도 on 클래스선택자 적용
+        $(this).addClass("on").prevAll("a").addClass("on");
+      
+      });
+    });
+
+    // 수정하기 이벤트
+    
+    $("div#reviewList").on("click", "button[name='update']", function() {
+      //console.log("수정하기");
+
+      let rev_code = $(this).data("rev_code"); // 상품후기코드
+      
+      let cur_tr = $(this).parent().parent();
+
+      let rev_rate = 0;
+
+      // <a class="rev_rate on">★</a> 태그에 class="rev_rate on" 이 개수가 몇개인지 체크
+      $("p#star_rev_rate a.rev_rate").each(function() {
+        if($(this).attr("class") == "rev_rate on") {
+          rev_rate += 1;
+        }
+      })
+
+      console.log("별펑점", rev_rate);
+
+      // name="rev_content"
+
+      let  rev_content = cur_tr.find("input[name='rev_content']").val();
+      console.log(rev_content);
+
+      // 스프링 작업.
+      $.ajax({
+        url: '/review/review_modify',
+        type: 'put',
+        headers: {
+          "Content-Type" : "application/json", "X-HTTP-Method-Overrid" : "PUT"
+        },
+        data: JSON.stringify({rev_code : rev_code, rev_rate : rev_rate, rev_content : rev_content}),
+        dataType: 'text',
+        success: function(result) {
+          if(result == "success") {
+            alert("상품후기 수정됨");
+            
+            getPage(url);
+          }
+        }
+      });
+
+
+
+      rev_rate = 0;
+
+      // 상품후기, 페이징정보를 스프링으로 부터 재 호출
+      //getPage(url);
+    });
+
+    // 취소 이벤트. 
+     $("div#reviewList").on("click", "button[name='cancel']", function() {
+      getPage(url);
+
+     });
+
+
+     // 삭제 이벤트
+     $("div#reviewList").on("click", "button[name='delete']", function() {
+      
+      if(!confirm("상품후기를 삭제하시겠습니까?")) return;
+
+      let rev_code = $(this).data("rev_code");
+
+      console.log("상품후기코드", rev_code);
+
+      // 스프링 작업.
+      $.ajax({
+        url: '/review/review_delete/' + rev_code,
+        type: 'delete',
+        headers: {
+          "X-HTTP-Method-Overrid" : "DELETE"
+        },
+        dataType: 'text',
+        success: function(result) {
+          if(result == "success") {
+            alert("상품후기 삭제됨");
+            
+            getPage(url);
+          }
+        }
+      });
+      
+      //getPage(url);
+
+     });
+    
+  
+  }); // ready event end
 
   </script>
 </th:block>

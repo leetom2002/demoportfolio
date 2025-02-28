@@ -34,6 +34,23 @@ public class CartController {
 	@Value("${com.ezen.upload.path}")
 	private String uploadPath;
 	
+	
+	// 인증되지 않은 상태에서 ajax요청 일 경우 호출
+	@GetMapping("/cart_add")
+	public String ajax_cart_add(CartVO vo, HttpSession session ) throws Exception {
+			
+		log.info("장바구니: " + vo);
+		
+		ResponseEntity<String> entity = null;
+		
+		String mbsp_id = ((MemberVO)session.getAttribute("login_auth")).getMbsp_id();
+		vo.setMbsp_id(mbsp_id);
+		
+		cartService.cart_add(vo);
+	
+		return "redirect:/cart/cart_list";
+	}
+	
 	// HttpSession session : 인증된 사용자만 사용하는 기능.
 	@PostMapping("/cart_add")
 	public ResponseEntity<String> cart_add(CartVO vo, HttpSession session ) throws Exception {
