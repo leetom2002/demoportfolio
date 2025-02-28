@@ -5,15 +5,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ezen.shop.common.utils.PageMaker;
 import com.ezen.shop.common.utils.SearchCriteria;
+import com.ezen.shop.member.MemberVO;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,6 +61,26 @@ public class ReviewController {
 		entity = new ResponseEntity<Map<String,Object>>(map, HttpStatus.OK);
 		
 		return entity;
+	}
+	
+	// Create(등록)
+	// @RequestBody ReviewVO vo : 클라이언트에서 전송되어 온 데이타를 ReviewVO클래스의 필드로 매핑(변환)하는 작업.
+	@PostMapping(value = "/review_save", consumes = "application/json", produces = {MediaType.TEXT_PLAIN_VALUE})
+	public ResponseEntity<String> review_save(@RequestBody ReviewVO vo, HttpSession session) throws Exception {
+		
+		String mbsp_id = ((MemberVO)session.getAttribute("login_auth")).getMbsp_id();
+		vo.setMbsp_id(mbsp_id);
+		
+		log.info("상품후기: " + vo);
+		
+		ResponseEntity<String> entity = null;
+		
+		reviewService.review_save(vo);
+		
+		entity = new ResponseEntity<String>("success", HttpStatus.OK);
+		
+		return entity;
+		
 	}
 	
 }

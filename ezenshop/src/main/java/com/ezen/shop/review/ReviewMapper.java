@@ -12,4 +12,6 @@ public interface ReviewMapper {
 	
 	// 페이징정보를 구성하기위한 상품후기 개수.
 	int getCountReviewByPro_num(Integer pro_num);
+	
+	void review_save(ReviewVO vo);
 }

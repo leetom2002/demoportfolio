@@ -27,5 +27,15 @@
 			pro_num = #{pro_num}
 	
 	</select>
+	
+	<insert id="review_save" parameterType="com.ezen.shop.review.ReviewVO">
+	
+		insert into 
+			review_tbl(mbsp_id,pro_num,rev_content,rev_rate)
+		values
+			(#{mbsp_id}, #{pro_num},#{rev_content},#{rev_rate})
+	
+	
+	</insert>
 
 </mapper>

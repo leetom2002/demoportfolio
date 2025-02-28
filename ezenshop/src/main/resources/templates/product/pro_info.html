@@ -4,6 +4,22 @@
 	layout:decorate="~{layouts/layout}">
 
 <th:block layout:fragment="css">
+
+  <style>
+    /* 별평점 기본효과 스타일 */
+    p#star_rev_rate a.rev_rate {
+      font-size: 22px;
+      text-decoration: none;
+      color: lightgray;
+    }
+
+    /* 별평점에 클릭했을 경우 선택자 */
+    p#star_rev_rate a.rev_rate.on {
+      color: black;
+    }
+
+  </style>
+
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
 </th:block>    
 <th:block layout:fragment="script">
@@ -26,9 +42,11 @@
         <td>{{rev_code}}</td>
         <td>{{mbsp_id}}</td>
         <td>{{rev_content}}</td>
+        <td>{{rev_content}}</td>
+        <td>{{displayStar rev_rate}}</td>
         <td>{{convertDate rev_date}}</td>
         <td>
-          버튼         
+          {{authControlView mbsp_id rev_code}}         
         </td>
         </tr>
         {{/each}}
@@ -37,6 +55,7 @@
 
   </script>
 
+  <!-- 자바스크립트에서 타임리프 문법을 사용할 때 아래와 같이 작성한다. -->
   <script th:inline="javascript">
     // 핸들바 템플릿에서 사용자정의 함수 : 후기작성시간 포맷(형식) 2025/01/06 11:55:30
     Handlebars.registerHelper("convertDate", function(reviewDate) {
@@ -53,26 +72,27 @@
     // 핸들바 템플릿 사용자정의 함수 : 로그인사용자와 후기작성자(msbp_id)가 동일할 때만 수정,삭제 버튼표시
     Handlebars.registerHelper("authControlView", function(msbp_id, rev_code) {
       
-      console.log("작성자", msbp_id);
-      console.log("상품후기코드", rev_code);
+      // console.log("작성자", msbp_id);
+      // console.log("상품후기코드", rev_code);
       
       // 로그인사용자 : 세션으로 확인
-      let memberVo = JSON.parse([[${session.login_auth}]]);
-      console.log("세션인증객체", memberVo.mbsp_id);
+      
+      let memberVo = [[${session.login_auth}]];
 
       let loginId = "";
-      /*
-      if(memberVo !== null) {
-        loginId = [[${session.login_auth.mbsp_id}]];
+      
+      if(memberVo !== null) { // 로그인 상태이면
+        loginId = [[${session.login_auth == null? '' : session.login_auth.mbsp_id}]];
       }
-      */
-      loginId = [[${session.login_auth.mbsp_id}]];
+      
+      // loginId = [[${session.login_auth == null? '' : session.login_auth.mbsp_id}]];
 
 
       console.log("아이디", loginId);
 
       let str = "";
 
+      // 사용자가 로그인상태이고, 로그인아이디와 후기작성자아이디가 일치한다면
       if(memberVo !== null && loginId == msbp_id) {
         str += `<button type="button" name="delete" class="btn btn-outline-danger btn-sm" data-rno="${rev_code}">delete</button>`;
         str += `<button type="button" name="edit" class="btn btn-outline-info btn-sm" data-rno="${rev_code}">edit</button>`;
@@ -82,6 +102,29 @@
       }else {
         return str;
       }
+    });
+
+    // 후기평점을 이용한 별표시 핸들바 사용자정의 함수
+    Handlebars.registerHelper("displayStar", function(rating) {
+      let star = "";
+      switch(rating) {
+        case 1:
+          star = "★☆☆☆☆";
+          break;
+        case 2:
+          star = "★★☆☆☆";
+          break;
+        case 3:
+          star = "★★★☆☆";
+          break;
+        case 4:
+          star = "★★★★☆";
+          break;
+        case 5:
+          star = "★★★★★";
+          break;
+      }
+      return star;
     });
   </script>
 </th:block>
@@ -123,7 +166,22 @@
         <p th:utext="${productVo.pro_content}"></p>
       </div>
       <div id="tabs-2">
-        <p>리뷰</p>
+        <div class="row mt-3 mb-3">
+          <div class="col-10">
+            <textarea class="form-control" id="rev_content" rows="3"></textarea>
+          </div>
+          <div class="col-2">
+            <p id="star_rev_rate">
+              <a class="rev_rate" href="#">☆</a>
+              <a class="rev_rate" href="#">☆</a>
+              <a class="rev_rate" href="#">☆</a>
+              <a class="rev_rate" href="#">☆</a>
+              <a class="rev_rate" href="#">☆</a>
+              (별평점)
+            </p>
+            <button type="button" class="btn btn-primary mb-2" id="btn_rev_save" th:data-pro_num="${productVo.pro_num}">후기 작성하기</button>
+          </div>
+        </div>
         <div class="row">
           <!-- 상품후기목록이 출력되는 위치 -->
           <div class="col" id="reviewList"></div>
@@ -189,7 +247,12 @@
 
       // 스프링에서 댓글목록과 페이징정보를 ajax기능으로 호출하는 함수.
 		function getPage(url) {
-			// data : 스프링에서 json포맷으로 보낸 댓글목록과페이징정보데이타 받게된다
+			
+      $("#rev_content").val(""); // 후기평을 지우기
+      $("p#star_rev_rate a.rev_rate").removeClass("on"); // 별평점 초기화
+
+      
+      // data : 스프링에서 json포맷으로 보낸 댓글목록과페이징정보데이타 받게된다
 			$.getJSON(url, function(data) {
 				console.log(data.rev_list); // 댓글 목록데이타
 				console.log(data.pageMaker); // 댓글 페이징정보
@@ -276,6 +339,59 @@
       url = "/review/rev_list/" + pro_num + "/" + reviewPage;
 
       getPage(url);
+    });
+
+    // 별평점 클릭 이벤트일때 스타일 효과
+    $("p#star_rev_rate a.rev_rate").on("click", function(e) {
+      e.preventDefault();
+      // 기존에 적용했던 a태그(별)들의 on 클래스선택자 제거
+      $(this).parent().children().removeClass("on");
+      // 선택한 a태그 자신에 on 클래스선택자 적용하고, 이전 a태그(이전 별들)에게도 on 클래스선택자 적용
+      $(this).addClass("on").prevAll("a").addClass("on");
+    })
+
+    // 상품후기저장 클릭이벤트.  id="btn_rev_save"
+    $("button#btn_rev_save").on("click", function() {
+      let pro_num = $(this).data("pro_num");
+      let rev_content = $("#rev_content").val();
+      let rev_rate = 0;
+
+      // <a class="rev_rate on">★</a> 태그에 class="rev_rate on" 이 개수가 몇개인지 체크
+      $("p#star_rev_rate a.rev_rate").each(function() {
+        if($(this).attr("class") == "rev_rate on") {
+          rev_rate += 1;
+        }
+      })
+
+      if(rev_content == "") {
+        alert("후기 평을 작성해주세요");
+        return;
+      }
+
+      if(rev_rate == 0) {
+        alert("별 평점을 선택하세요.");
+        return;
+      }
+      // REST API 개발방법론 : 서버와클라이언트가 데이타를 JSON포맷으로 주고 받는 특징. https://junvelee.tistory.com/107
+      // 데이타 : 자바스크립트 object문법
+      let review_data = {pro_num : pro_num, rev_content : rev_content, rev_rate : rev_rate};
+
+      $.ajax({
+        url : '/review/review_save',
+        type: 'post',
+        headers: {
+          "Content-Type" : "application/json", "X-HTTP-Method-Overrid" : "POST"
+        },
+        data : JSON.stringify(review_data), // object문법을 json문자열로 변환
+        dataType: 'text',
+        success: function(result) {
+          if(result == "success") {
+            alert("상품후기 등록됨");
+            reviewPage = 1;
+            getPage(url);
+          }
+        }
+      });
     });
 
     }); // ready event end

@@ -21,4 +21,8 @@ public class ReviewService {
 	public int getCountReviewByPro_num(Integer pro_num) {
 		return reviewMapper.getCountReviewByPro_num(pro_num);
 	}
+	
+	public void review_save(ReviewVO vo) {
+		reviewMapper.review_save(vo);
+	}
 }

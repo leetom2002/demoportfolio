@@ -88,6 +88,7 @@ public class MemberController {
 		// null이면 아이디가 존재안한다. null 아니면 아이디가 존재한다는 의미.
 		MemberVO memberVO = memberService.login(dto.getMbsp_id());
 		
+		
 		String url = "";
 		String status = "";
 		if(memberVO != null) { // 아이디가 존재  matches("사용자가 입력비밀번호", "db에서 가져온 암호된비밀번호")
@@ -95,6 +96,7 @@ public class MemberController {
 			if(passwordEncoder.matches(dto.getMbsp_password(), memberVO.getMbsp_password())) { // 비번이 맞는의미
 				// 사용자를 인증처리하기위한 정보
 				// UserInfo클래스인 userInfo객체가 Object형으로 저장된다. 꺼내올 때는 원래의 형(UserInfo클래스)으로 형변환시켜야 한다.
+				memberVO.setMbsp_password("");
 				session.setAttribute("login_auth", memberVO);
 				
 				url = "/";
