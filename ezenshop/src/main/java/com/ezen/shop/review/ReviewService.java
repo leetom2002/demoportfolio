@@ -1,6 +1,7 @@
 package com.ezen.shop.review;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,5 +44,9 @@ public class ReviewService {
 	
 	public void review_delete(Long rev_code) {
 		reviewMapper.review_delete(rev_code);
+	}
+	
+	public void reply_insert(ReviewReply vo) {
+		reviewMapper.reply_insert(vo);
 	}
 }

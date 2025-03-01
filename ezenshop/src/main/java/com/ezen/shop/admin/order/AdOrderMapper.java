@@ -36,4 +36,6 @@ public interface AdOrderMapper {
 	void order_info_change_price(Integer ord_code, int ord_total_price);
 	
 	void payment_change_price(@Param("ord_code") Integer ord_code, @Param("ord_total_price") int ord_total_price);
+	
+	void order_status(@Param("ord_code") Integer ord_code, @Param("ord_status") String ord_status);
 }

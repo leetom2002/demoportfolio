@@ -4,7 +4,7 @@
 
 	<select id="order_list" resultType="HashMap" parameterType="com.ezen.shop.common.utils.SearchCriteria">
 		select 
-			o.ord_code, o.ord_name, o.ord_price, o.ord_status, p.payment_method, p.payment_status, o.ord_regdate
+			o.ord_code, o.ord_name, o.ord_price, o.ord_status, p.payment_id, p.payment_method, p.payment_status, o.ord_regdate
 		from 
 			order_tbl o
 		inner join 
@@ -198,5 +198,16 @@
  	
  	</update>
  	
+ 	
+ 	<update id="order_status" parameterType="map">
+ 	
+ 		update 
+ 			order_tbl
+ 		set
+ 			ord_status = #{ord_status}
+ 		where 
+			ord_code = #{ord_code}
+ 	
+ 	</update>
  	
 </mapper>

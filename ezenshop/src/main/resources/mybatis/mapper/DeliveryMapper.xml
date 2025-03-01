@@ -7,7 +7,7 @@
 		insert into 
 			delivery_tbl(ord_code, shipping_zipcode, shipping_addr, shipping_deaddr)
 		values
-			(#{ord_code}, #{shipping_zipcode}, #{shipping_addr}, #{shipping_addr})
+			(#{ord_code}, #{shipping_zipcode}, #{shipping_addr}, #{shipping_deaddr})
 	
 	</insert>
 

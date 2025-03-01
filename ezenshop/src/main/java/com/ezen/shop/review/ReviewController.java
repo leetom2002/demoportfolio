@@ -46,7 +46,7 @@ public class ReviewController {
 		ResponseEntity<Map<String, Object>> entity = null;
 		Map<String, Object> map = new HashMap<>();
 		
-		//1)상품후기목록
+		//1)상품후기및답변목록
 		SearchCriteria cri = new SearchCriteria();
 		cri.setPerPageNum(10);
 		cri.setPage(page);

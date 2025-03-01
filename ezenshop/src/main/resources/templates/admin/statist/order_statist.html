@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Year Selector</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const ctx = document.getElementById('orderChart').getContext('2d');
+            let orderChart;
+
+            function fetchAndUpdateChart(year) {
+                $.ajax({
+                    url: '/admin/statist/monthlysales',
+                    type: 'GET',
+                    data: { year: year },
+                    success: function (response) {
+                        
+                        console.log("response", response);
+                        
+                        const labels = response.labels;
+                        const data = response.data;
+
+                        console.log("labels", labels);
+                        console.log("data", data);
+
+                        if (orderChart) {
+                            orderChart.destroy();
+                        }
+
+                        orderChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: `Order Amount (${year})`,
+                                    data: data,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: true },
+                                tooltip: { enabled: true }
+                            },
+                            scales: {
+                                x: {
+                                    title: { display: true, text: 'Month' }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: { display: true, text: 'Total Sales' }
+                                }
+                            }
+                        }
+                       });
+                    },
+                    error: function () {
+                        alert('Failed to fetch data.');
+                    }
+                });
+            }
+
+            $('#year').change(function () {
+                const selectedYear = $(this).val();
+                fetchAndUpdateChart(selectedYear);
+            });
+
+            // Initial load
+            //fetchAndUpdateChart($('#year').val());
+        });
+    </script>
+</head>
+<body>
+    <h1>Select a Year</h1>
+        <label for="year">Year:</label>
+        <select id="year" name="year">
+            <option value="" selected>년도를 선택하세요.</option>
+            <option th:each="year : ${#numbers.sequence(#dates.year(#dates.createNow()), #dates.year(#dates.createNow()) - 4)}"
+                    th:value="${year}" th:text="${year}"></option>
+	    </select>
+    <div style="width: 500px; height: 500px;">
+        <canvas id="orderChart"></canvas>
+    </div>
+</body>
+</html>

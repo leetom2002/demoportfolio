@@ -62,4 +62,8 @@ public class AdOrderService {
 		// 결제테이블 결제금액 변경(update)
 		adOrderMapper.payment_change_price(ord_code, ord_total_price);
 	}
+	
+	public void order_status(Integer ord_code, String ord_status) {
+		adOrderMapper.order_status(ord_code, ord_status);
+	}
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ezen.shop.admin.statistics.StatisticsMapper">
+
+	<select id="monthlysales_statistics" resultType="com.ezen.shop.admin.statistics.OrderAmount">
+	
+		SELECT 
+    		DATE_FORMAT(ORD_REGDATE, '%Y-%m') AS month,
+    		SUM(ORD_PRICE) AS amount
+		FROM 
+    		ORDER_TBL
+		where 
+			year(ORD_REGDATE) = #{year}
+		GROUP BY 
+    		DATE_FORMAT(ORD_REGDATE, '%Y-%m')
+		ORDER BY 
+    		month
+	
+	</select>
+
+
+
+</mapper>

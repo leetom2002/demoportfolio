@@ -155,6 +155,19 @@ public class AdOrderController {
 		return entity;
 	}
 	
+	// 주문상태변경
+	@PostMapping("/order_status")
+	public ResponseEntity<String> order_status(Integer ord_code, String ord_status) throws Exception {
+		
+		ResponseEntity<String> entity = null;
+		
+		adOrderService.order_status(ord_code, ord_status);
+				
+		entity = new ResponseEntity<String>("success", HttpStatus.OK);
+		
+		return entity;
+	}
+	
 	
 	
 	
