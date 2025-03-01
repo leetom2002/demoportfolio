@@ -39,7 +39,10 @@ public class StatisticsController {
 		//List<Map<String, Object>> monthlysales = statisticsService.monthlysales_statistics(year);
 		List<OrderAmount> monthlysales = statisticsService.monthlysales_statistics(year);
 		
+		// 차트 레이블과 데이터 포맷에 맞게 작업.(스프링부트, 자바스크립트)
 		Map<String, Object> response = new HashMap<>();
+		
+		
         response.put("labels", monthlysales.stream().map(OrderAmount::getMonth).toArray());
         response.put("data", monthlysales.stream().map(OrderAmount::getAmount).toArray());
 		
@@ -47,5 +50,43 @@ public class StatisticsController {
 		
 		return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping("/monthlysales2")
+	public ResponseEntity<List<Map<String, Object>>> monthlysales2(Integer year) throws Exception {
+		
+		return ResponseEntity.ok(statisticsService.monthlysales_statistics2(year));
+	}
+	
+	// 전체주문통계
+	@GetMapping("/static_sale_all")
+	public void static_sale_all() throws Exception {
+				
+	}
+	
+	@GetMapping("/daily")
+	public ResponseEntity<List<Map<String, Object>>> getDailyStatistics(int year, int month) throws Exception {
+		
+		return ResponseEntity.ok(statisticsService.getDailyStatistics(year, month));
+	}
+	
+	@GetMapping("/hourly")
+	public ResponseEntity<List<Map<String, Object>>> getHourlyStatistics(String start_date, String end_date) throws Exception {
+		
+		return ResponseEntity.ok(statisticsService.getHourlyStatistics(start_date, end_date));
+	}
+	
+	@GetMapping("/weekly")
+	public ResponseEntity<List<Map<String, Object>>> getWeeklyStatistics(String start_date, String end_date) throws Exception {
+		
+		return ResponseEntity.ok(statisticsService.getWeeklyStatistics(start_date, end_date));
+	}
+	
+	@GetMapping("/monthly")
+	public ResponseEntity<List<Map<String, Object>>> getMonthlyStatistics(int year) throws Exception {
+		
+		return ResponseEntity.ok(statisticsService.getMonthlyStatistics(year));
+	}
+	
+	
 	
 }

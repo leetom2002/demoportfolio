@@ -13,11 +13,27 @@ public class StatisticsService {
 
 	private final StatisticsMapper statisticsMapper;
 	
-//	public List<Map<String, Object>> monthlysales_statistics(int year) {
-//		return statisticsMapper.monthlysales_statistics(year);
-//	}
-	
 	public List<OrderAmount> monthlysales_statistics(int year) {
 		return statisticsMapper.monthlysales_statistics(year);
+	}
+	
+	public List<Map<String, Object>> monthlysales_statistics2(int year) {
+		return statisticsMapper.monthlysales_statistics2(year);
+	}
+	
+	public List<Map<String, Object>> getDailyStatistics(int year, int month) {
+		return statisticsMapper.getDailyStatistics(year, month);
+	}
+	
+	public List<Map<String, Object>> getHourlyStatistics(String start_date, String end_date) {
+		return statisticsMapper.getHourlyStatistics(start_date, end_date);
+	}
+	
+	public List<Map<String, Object>> getWeeklyStatistics(String start_date, String end_date) {
+		return statisticsMapper.getWeeklyStatistics(start_date, end_date);
+	}
+	
+	public List<Map<String, Object>> getMonthlyStatistics(int year) {
+		return statisticsMapper.getMonthlyStatistics(year);
 	}
 }
