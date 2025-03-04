@@ -1,5 +1,10 @@
 package com.ezen.shop.admin.statistics;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +47,7 @@ public class StatisticsController {
 		// 차트 레이블과 데이터 포맷에 맞게 작업.(스프링부트, 자바스크립트)
 		Map<String, Object> response = new HashMap<>();
 		
-		
+		// 차트에 필요한 데이타 구성작업
         response.put("labels", monthlysales.stream().map(OrderAmount::getMonth).toArray());
         response.put("data", monthlysales.stream().map(OrderAmount::getAmount).toArray());
 		
@@ -54,6 +59,16 @@ public class StatisticsController {
 	@GetMapping("/monthlysales2")
 	public ResponseEntity<List<Map<String, Object>>> monthlysales2(Integer year) throws Exception {
 		
+		// 차트에 필요한 데이터포맷 작업을 자바스크립트에서 처리
+		
+		/*
+		ResponseEntity<List<Map<String, Object>>> entity =  null;
+		
+		entity = new ResponseEntity<List<Map<String,Object>>>(statisticsService.monthlysales_statistics2(year), HttpStatus.OK);
+		
+		return entity;
+		*/
+		
 		return ResponseEntity.ok(statisticsService.monthlysales_statistics2(year));
 	}
 	
@@ -64,13 +79,19 @@ public class StatisticsController {
 	}
 	
 	@GetMapping("/daily")
-	public ResponseEntity<List<Map<String, Object>>> getDailyStatistics(int year, int month) throws Exception {
+	public ResponseEntity<List<Map<String, Object>>> getDailyStatistics(String date) throws Exception {
 		
-		return ResponseEntity.ok(statisticsService.getDailyStatistics(year, month));
+		log.info("날짜:" + date);
+//		int year = Integer.parseInt(date.substring(0, 4));
+//		int month = Integer.parseInt(date.substring(4));
+				
+		return ResponseEntity.ok(statisticsService.getDailyStatistics(date));
 	}
 	
 	@GetMapping("/hourly")
 	public ResponseEntity<List<Map<String, Object>>> getHourlyStatistics(String start_date, String end_date) throws Exception {
+		
+		log.info("날짜:" + start_date + "~" + end_date);
 		
 		return ResponseEntity.ok(statisticsService.getHourlyStatistics(start_date, end_date));
 	}
@@ -82,7 +103,7 @@ public class StatisticsController {
 	}
 	
 	@GetMapping("/monthly")
-	public ResponseEntity<List<Map<String, Object>>> getMonthlyStatistics(int year) throws Exception {
+	public ResponseEntity<List<Map<String, Object>>> getMonthlyStatistics(String year) throws Exception {
 		
 		return ResponseEntity.ok(statisticsService.getMonthlyStatistics(year));
 	}

@@ -41,7 +41,7 @@
         from 
         	order_tbl
         where 
-        	year(ord_regdate) = #{year} and month(ord_regdate) = #{month}
+        	DATE_FORMAT(ord_regdate, '%Y-%m') = #{date}
         group by 
         	date(ord_regdate)
         order by 
@@ -51,32 +51,33 @@
 	
 	<select id="getHourlyStatistics" resultType="hashmap">
 	
+		<![CDATA[
 		select 
 			hour(ord_regdate) as hour, sum(ord_price) as total_sales
         from 
         	order_tbl
         where 
-        	ord_regdate between #{start_date} and #{end_date}
+        	ord_regdate >= #{start_date} and ord_regdate < #{end_date}
         group by 
         	hour(ord_regdate)
         order by 
         	hour asc
-	
+		]]>
 	</select>
 	
 	<select id="getWeeklyStatistics" resultType="hashmap">
-	
+		<![CDATA[
 		select 
 			dayname(ord_regdate) as weekday, sum(ord_price) as total_sales
         from 
         	order_tbl
         where 
-        	ord_regdate between #{start_date} and #{end_date}
+        	ord_regdate >= #{start_date} and ord_regdate < #{end_date}
         group by 
         	dayname(ord_regdate)
         ORDER BY 
         	FIELD(weekday, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
-	
+		]]>
 	</select>
 	
 	<select id="getMonthlyStatistics" resultType="hashmap">

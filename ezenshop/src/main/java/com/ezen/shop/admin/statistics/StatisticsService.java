@@ -21,8 +21,8 @@ public class StatisticsService {
 		return statisticsMapper.monthlysales_statistics2(year);
 	}
 	
-	public List<Map<String, Object>> getDailyStatistics(int year, int month) {
-		return statisticsMapper.getDailyStatistics(year, month);
+	public List<Map<String, Object>> getDailyStatistics(String date) {
+		return statisticsMapper.getDailyStatistics(date);
 	}
 	
 	public List<Map<String, Object>> getHourlyStatistics(String start_date, String end_date) {
@@ -33,7 +33,7 @@ public class StatisticsService {
 		return statisticsMapper.getWeeklyStatistics(start_date, end_date);
 	}
 	
-	public List<Map<String, Object>> getMonthlyStatistics(int year) {
+	public List<Map<String, Object>> getMonthlyStatistics(String year) {
 		return statisticsMapper.getMonthlyStatistics(year);
 	}
 }
